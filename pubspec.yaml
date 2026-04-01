@@ -1,0 +1,17 @@
+name: 'parchmentmap'
+version: 0.0.1
+description: Parchment map generator.
+publish_to: none
+
+environment:
+  sdk: ^3.11.4
+
+dependencies:
+  web: any
+
+dev_dependencies:
+  build_runner: any
+  build_web_compilers: any
+  analyzer: any
+
+
