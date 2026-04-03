@@ -5,6 +5,8 @@ import 'package:web/web.dart';
 import 'dart:js_interop';
 import 'dart:math';
 
+import "worker/workerhandler.dart";
+
 late HTMLCanvasElement canvas;
 late CanvasRenderingContext2D ctx;
 Random rand = new Random(1);
@@ -98,7 +100,10 @@ Future<void> main() async {
 
   await Future.wait(loading);
 
-  makeMap();
+  //makeMap();
+  
+  WorkerHandler renderer = createWebWorker("renderer.worker.dart");
+  print(await renderer.sendCommand("test", payload: "hi"));
 }
 
 void makeMap() {
