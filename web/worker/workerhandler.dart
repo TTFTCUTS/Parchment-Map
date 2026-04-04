@@ -7,12 +7,6 @@ import "../utility/path_utils.dart";
 /// Provides an interface for a web worker with a main class based on WorkerBase
 /// Instantiate a worker and handler with createWebWorker
 class WorkerHandler {
-    // static const String idLabel = "id";
-    // static const String payloadLabel = "payload";
-    // static const String errorLabel = "error";
-    // static const String traceLabel = "trace";
-    // static const String commandLabel = "command";
-
     Worker? _worker;
     StreamController<Event> _errorController = new StreamController();
     late Stream<Event> onError = _errorController.stream;
