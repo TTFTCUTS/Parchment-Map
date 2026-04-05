@@ -1,3 +1,4 @@
+import "dart:math";
 import "../utility/colour.dart";
 import "terrainelement.dart";
 import "fillfunction.dart";
@@ -5,27 +6,38 @@ import "placement.dart";
 
 
 class TerrainType {
-
-
   final String name;
   late final Colour colour;
 
-  final List<TerrainElement>? elements;
+  late final List<TerrainElement> elements;
 
-  FillFunc? fillfunc;
-  PlacementFunc? placefunc;
+  FillFunc? _fillfunc;
+  FillFunc get fillfunc => _fillfunc!;
+  PlacementFunc? _placefunc;
+  PlacementFunc get placefunc => _placefunc!;
   final bool solid;
   final bool sky;
   final bool water;
 
-  TerrainType(String this.name, int red, int green, int blue, {List<TerrainElement>? this.elements = null, FillFunc? this.fillfunc = null, PlacementFunc? this.placefunc = null, bool this.solid = true, bool this.sky = false, bool this.water = false}) {
+  late final int xMin, xMax, yMin, yMax;
+
+  TerrainType(String this.name, int red, int green, int blue, {List<TerrainElement>? elements = null, FillFunc? fillfunc = null, PlacementFunc? placefunc = null, bool this.solid = true, bool this.sky = false, bool this.water = false}) {
     this.colour = new Colour(red, green, blue);
-    if (this.fillfunc == null) {
-      this.fillfunc = FillFunctions.LAND_FILL;
+    this.elements = elements ?? [];
+    this._fillfunc = fillfunc ?? FillFunctions.LAND_FILL;
+    this._placefunc = placefunc ?? FillFunctions.DEFAULT_PLACEMENT;
+
+    int x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+    for(TerrainElement element in this.elements) {
+      x1 = min(x1, element.xMin);
+      x2 = max(x2, element.xMax);
+      y1 = min(y1, element.yMin);
+      y2 = max(y2, element.yMax);
     }
-    if (this.placefunc == null) {
-      this.placefunc = FillFunctions.DEFAULT_PLACEMENT;
-    }
+    xMin = x1;
+    xMax = x2;
+    yMin = y1;
+    yMax = y2;
   }
 
   @override

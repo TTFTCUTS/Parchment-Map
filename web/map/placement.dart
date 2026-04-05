@@ -7,6 +7,7 @@ typedef bool PlacementFunc(int x, int y, MapData map);
 typedef double Curve(double input);
 
 abstract class Place {
+  static int _seedOffset = 1000000;
   static PlacementFunc grid(int xspacing, int yspacing, [int ox=0, int oy=0]) {
     return (int x, int y, MapData map) {
       if ((x+ox) % xspacing == 0 && (y+oy) % yspacing == 0) {
@@ -30,7 +31,7 @@ abstract class Place {
 
   static PlacementFunc chanceOf(double chance, [PlacementFunc? function]) {
     return (int x, int y, MapData map) {
-      Random rand = new Random(y * map.width + x);
+      Random rand = new Random(y * map.width + x + map.seed + _seedOffset);
       if( rand.nextDouble() > chance) {
         return false;
       }
@@ -42,7 +43,7 @@ abstract class Place {
     int irad = radius.ceil();
 
     return (int x, int y, MapData map) {
-      Random rand = new Random(y * map.width + x);
+      Random rand = new Random(y * map.width + x + map.seed + _seedOffset);
       double closest = double.infinity;
 
       for (int oy = -irad; oy <= irad; oy++) {

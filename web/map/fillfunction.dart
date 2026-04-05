@@ -9,6 +9,7 @@ import "terraintype.dart";
 typedef Colour FillFunc(int x, int y, MapData map, bool borders);
 
 abstract class FillFunctions {
+  static int _seedOffset = 1;
   static FillFunc DEFAULT_FILL = (int x, int y, MapData map, bool borders) => map.terrainAt(x, y).colour;
   static PlacementFunc DEFAULT_PLACEMENT = (int x, int y, MapData map) => false;
 
@@ -41,7 +42,7 @@ abstract class FillFunctions {
       }
     }
 
-    int val = ((1.0-border) * 255).floor();
+    int val = ((1.0-border).clamp(0, 1) * 255).floor();
 
     return new Colour(val,val,val);//Colour.WHITE;
   };
@@ -59,22 +60,22 @@ abstract class FillFunctions {
     int xCell = x ~/ _farm_cell_size;
     int yCell = y ~/ _farm_cell_size;
 
-    Random rand1 = new Random((yCell) * widthCells + (xCell));
+    Random rand1 = new Random((yCell) * widthCells + (xCell) + map.seed + _seedOffset);
     double x1 = (xCell) * _farm_cell_size + rand1.nextDouble()*_farm_cell_deviation - _farm_cell_deviation * 0.5;
     double y1 = (yCell) * _farm_cell_size + rand1.nextDouble()*_farm_cell_deviation - _farm_cell_deviation * 0.5;
     double d1 = (x-x1)*(x-x1) + (y-y1)*(y-y1);
 
-    Random rand2 = new Random((yCell) * widthCells + (xCell+1));
+    Random rand2 = new Random((yCell) * widthCells + (xCell+1) + map.seed + _seedOffset);
     double x2 = (xCell+1) * _farm_cell_size + rand2.nextDouble()*_farm_cell_deviation - _farm_cell_deviation * 0.5;
     double y2 = (yCell) * _farm_cell_size + rand2.nextDouble()*_farm_cell_deviation - _farm_cell_deviation * 0.5;
     double d2 = (x-x2)*(x-x2) + (y-y2)*(y-y2);
 
-    Random rand3 = new Random((yCell+1) * widthCells + (xCell));
+    Random rand3 = new Random((yCell+1) * widthCells + (xCell) + map.seed + _seedOffset);
     double x3 = (xCell) * _farm_cell_size + rand3.nextDouble()*_farm_cell_deviation - _farm_cell_deviation * 0.5;
     double y3 = (yCell+1) * _farm_cell_size + rand3.nextDouble()*_farm_cell_deviation - _farm_cell_deviation * 0.5;
     double d3 = (x-x3)*(x-x3) + (y-y3)*(y-y3);
 
-    Random rand4 = new Random((yCell+1) * widthCells + (xCell+1));
+    Random rand4 = new Random((yCell+1) * widthCells + (xCell+1) + map.seed + _seedOffset);
     double x4 = (xCell+1) * _farm_cell_size + rand4.nextDouble()*_farm_cell_deviation - _farm_cell_deviation * 0.5;
     double y4 = (yCell+1) * _farm_cell_size + rand4.nextDouble()*_farm_cell_deviation - _farm_cell_deviation * 0.5;
     double d4 = (x-x4)*(x-x4) + (y-y4)*(y-y4);
@@ -137,13 +138,13 @@ abstract class FillFunctions {
     double variance = r.nextDouble() * 0.1 - 0.05;
 
     double opacity = (_farm_opacity + variance) * fade;
-    int lineCol = (255 * (1-line*opacity)).floor();
+    int lineCol = (255 * (1-line*opacity).clamp(0, 1)).floor();
     Colour out = new Colour(lineCol, lineCol, lineCol);
 
     return landFill * out;
   }
 
-  static FillFunc OCEAN_FILL = (int x, int y, MapData map, bool borders) {
+  static Colour OCEAN_FILL(int x, int y, MapData map, bool borders) {
     double border = 0.0;
 
     for (int ox=-1; ox<=1; ox++) {
@@ -172,7 +173,7 @@ abstract class FillFunctions {
       }
     }
 
-    int edgeval = ((1.0-border*5) * 255).floor();
+    int edgeval = ((1.0-border*5).clamp(0, 1) * 255).floor();
 
     int rad = 10;
     double closest = double.infinity;
@@ -220,7 +221,7 @@ abstract class FillFunctions {
 
     int val = min(edgeval, 235);
     return new Colour(val,val,val);
-  };
+  }
 
   static const int landRange = 36;
   static const int landRadius = landRange ~/ 2;
@@ -329,11 +330,11 @@ abstract class FillFunctions {
     return new SkyFillInfo(renderLand, landY, landDistance, renderWater, waterY, waterDistance);
   }
 
-  static FillFunc SKY_FILL_FAST = (int x, int y, MapData map, bool borders) {
+  static Colour SKY_FILL_FAST(int x, int y, MapData map, bool borders) {
     return new Colour(220,220,220);
-  };
+  }
 
-  static FillFunc SKY_FILL = (int x, int y, MapData map, bool borders) {
+  static Colour SKY_FILL(int x, int y, MapData map, bool borders) {
 
     SkyFillInfo info = getSkyFillInfo(x, y, map);
     bool renderLand = info.renderLand;
@@ -345,20 +346,19 @@ abstract class FillFunctions {
 
     double border = 0.0;
 
-    var terrain = map.terrainAt(x, y);
+    var terrainHere = map.terrainAt(x, y);
 
     for (int oy = -1; oy <=1; oy++) {
       for (int ox = -1; ox <=1; ox++) {
         if (ox == 0 && oy == 0) { continue; }
         if (y+oy < 0 || y+oy >= map.height || x+ox < 0 || x+ox >= map.width) { continue; }
 
-        TerrainType? terrain = map.terrainAt(x+ox, y+oy);
+        TerrainType terrain = map.terrainAt(x+ox, y+oy);
         bool sky = (terrain.sky);
 
         SkyFillInfo sample = getSkyFillInfo(x+ox, y+oy, map);
 
-        var checked = map.terrainAt(x+ox, y+oy);
-        if ((borders || !sky) && checked != terrain) {
+        if ((borders || !sky) && terrain != terrainHere) {
           double darken = 0.0;
 
           if (ox == 0 || oy == 0) {
@@ -452,7 +452,7 @@ abstract class FillFunctions {
       // right side
       for (int i=1; i<=range; i++) {
         if (x-i >= 0) {
-          TerrainType? terrain = map.terrainAt(x - i, y);
+          TerrainType terrain = map.terrainAt(x - i, y);
           if (!terrain.sky) {
             closest = min(closest,i);
           } else {
@@ -467,7 +467,7 @@ abstract class FillFunctions {
       // left side
       for (int i=1; i<=range; i++) {
         if (x+i < map.width) {
-          TerrainType? terrain = map.terrainAt(x + i, y);
+          TerrainType terrain = map.terrainAt(x + i, y);
           if (!terrain.sky) {
             closest = min(closest,i);
           } else {
@@ -483,7 +483,7 @@ abstract class FillFunctions {
     }
 
     return output * (1-border);
-  };
+  }
 }
 
 class SkyFillInfo {
