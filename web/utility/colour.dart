@@ -12,6 +12,11 @@ class Colour {
     return "rgb($red, $green, $blue)";
   }
 
+  String toHexString() {
+    var rgb = red << 16 | green << 8 | blue;
+    return "#${rgb.toRadixString(16).toUpperCase().padLeft(6, "0")}";
+  }
+
   operator * (Object other) {
     if (other is num) {
       return new Colour((red*other).clamp(0, 255).floor(), (green*other).clamp(0, 255).floor(), (blue*other).clamp(0, 255).floor());

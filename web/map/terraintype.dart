@@ -8,6 +8,7 @@ import "placement.dart";
 class TerrainType {
   final String name;
   late final Colour colour;
+  String? description;
 
   late final List<TerrainElement> elements;
 
@@ -49,7 +50,7 @@ abstract class TerrainTypes {
   static TerrainType GRASSLAND = new TerrainType("Grassland", 110,160,80);
   static TerrainType FARMLAND = new TerrainType("Farmland", 145,211,106, fillfunc: FillFunctions.FARM_FILL);
   static TerrainType FOREST = new TerrainType("Forest", 80,100,50, elements: TerrainElements.TREES_WEIGHTED, placefunc: Place.staggered(16, 14, Place.chanceOf(0.65, Place.onLand(4,3))));
-  static TerrainType FARMLAND_FOREST = new TerrainType("Forested Farmland", 75,127,43, fillfunc: FillFunctions.FARM_FILL, elements: TerrainElements.TREES_WEIGHTED, placefunc:  Place.staggered(16, 14, Place.chanceOf(0.65, Place.onLand(4,3))));
+  static TerrainType FARMLAND_FOREST = new TerrainType("Forested Farmland", 75,127,43, fillfunc: FillFunctions.FARM_FILL, elements: TerrainElements.TREES_WEIGHTED, placefunc:  Place.staggered(16, 14, Place.chanceOf(0.65, Place.onLand(4,3))))..description = "Farmland ground with trees on it.";
   static TerrainType PINE_FOREST = new TerrainType("Pine Forest", 50,100,70, elements: TerrainElements.PINE_TREES_WEIGHTED, placefunc: Place.staggered(16, 14, Place.chanceOf(0.75, Place.onLand(4,3))));
   static TerrainType HILLS = new TerrainType("Hills", 157,178,131, elements: TerrainElements.HILLS_WEIGHTED, placefunc: Place.staggered(32,28, Place.chanceOf(0.5, Place.onLand(16,2))));
   static TerrainType MOUNTAINS = new TerrainType("Mountains", 220,220,220, elements: TerrainElements.MOUNTAINS_WEIGHTED, placefunc: Place.staggered(32,28, Place.onLand(16,2)));
@@ -58,9 +59,9 @@ abstract class TerrainTypes {
   static TerrainType WASTELAND = new TerrainType("Wasteland", 168,147,120, elements: TerrainElements.WASTELAND, placefunc: Place.staggered(32, 28, Place.chanceOf(0.12, Place.onLand(16,2))));
   static TerrainType TUNDRA = new TerrainType("Tundra", 195,182,179, elements: TerrainElements.TUNDRA_WEIGHTED, placefunc: Place.staggered(32, 28, Place.chanceOf(0.2, Place.onLand(16,2))));
   static TerrainType MARSH = new TerrainType("Marsh", 110,120,100, elements: TerrainElements.MARSHES_WEIGHTED, placefunc: Place.staggered(32, 28, Place.onLand(15,9)));
-  static TerrainType SKY = new TerrainType("Sky", 136,204,232, fillfunc: FillFunctions.SKY_FILL, solid: false, sky: true);
-  static TerrainType SKY_FAST = new TerrainType("Fast Sky", 149,224,255, fillfunc: FillFunctions.SKY_FILL_FAST, solid:false, sky:true, elements: TerrainElements.CLOUDS_128, placefunc: Place.staggered(400,250, Place.chanceOf(0.03)));
-  static TerrainType CLOUDS_128 = new TerrainType("Clouds 128", 186,232,225, fillfunc: FillFunctions.SKY_FILL, solid:false, sky:true, elements: TerrainElements.CLOUDS_128, placefunc: Place.staggered(128,60)); // Place.staggered(100,45));
+  static TerrainType SKY = new TerrainType("Sky", 136,204,232, fillfunc: FillFunctions.SKY_FILL, solid: false, sky: true)..description="For floating islands. Very slow to render, prefer Fast Sky for large areas away from land.";
+  static TerrainType SKY_FAST = new TerrainType("Fast Sky", 149,224,255, fillfunc: FillFunctions.SKY_FILL_FAST, solid:false, sky:true, elements: TerrainElements.CLOUDS_128, placefunc: Place.staggered(400,250, Place.chanceOf(0.03)))..description = "For areas far away from land, does not generate island undersides or waterfalls. Has occasional random clouds.";
+  static TerrainType CLOUDS_128 = new TerrainType("Clouds", 186,232,225, fillfunc: FillFunctions.SKY_FILL, solid:false, sky:true, elements: TerrainElements.CLOUDS_128, placefunc: Place.staggered(128,60))..description = "Dense clouds, good for scattering around sky areas.";
 
   static List<TerrainType> list = [OCEAN,GRASSLAND,FARMLAND,FOREST,FARMLAND_FOREST,PINE_FOREST,HILLS,MOUNTAINS,SAVANNA,DESERT,WASTELAND,TUNDRA,MARSH,SKY,SKY_FAST,CLOUDS_128];
 

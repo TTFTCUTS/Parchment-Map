@@ -3,6 +3,8 @@ library parchmentmap;
 import 'package:web/web.dart';
 import 'dart:js_interop';
 
+import "map/terraintype.dart";
+
 import "logging/logger.dart";
 import "utility/extensions.dart";
 
@@ -17,6 +19,9 @@ late final CanvasRenderingContext2D ctx;
 late final HTMLInputElement renderButton;
 late final HTMLInputElement seedInput;
 late final HTMLInputElement imageInput;
+
+late final HTMLDivElement legend;
+late final HTMLDivElement legendItems;
 
 late final WorkerHandler renderer;
 bool rendering = false;
@@ -38,12 +43,31 @@ void main() async {
     updateRenderButton();
   }.toJS);
 
+  legend = document.querySelector("#legend")! as HTMLDivElement;
+  legendItems = document.querySelector("#legendItems")! as HTMLDivElement;
+
+  (document.querySelector("#legendOpen")! as HTMLDivElement).addEventListener("click", (Event e) { legend.style.display = "block"; }.toJS);
+  (document.querySelector("#legendClose")! as HTMLDivElement).addEventListener("click", (Event e) { legend.style.display = "none"; }.toJS);
+
   // set up worker
   renderer = createWebWorker("renderer.worker.dart", poolSize: 8);
   await renderer.sendCommandToAll(RenderCommands.loadImages);
 
   imageInput.disabled = false;
   seedInput.disabled = false;
+
+  // set up legend
+  for (TerrainType terrainType in TerrainTypes.list) {
+    HTMLDivElement element = new HTMLDivElement()..className = "legendItem";
+
+    element.append(new HTMLDivElement()..className="swatch"..style.backgroundColor=terrainType.colour.toString());
+    element.append(new HTMLHeadingElement.h3()..textContent = "${terrainType.name} - ${terrainType.colour} ${terrainType.colour.toHexString()}");
+    if (terrainType.description != null) {
+      element.append(new HTMLParagraphElement()..textContent = terrainType.description);
+    }
+
+    legendItems.append(element);
+  }
 }
 
 void updateRenderButton() {
@@ -75,6 +99,7 @@ Future<Null> render() async {
 
   // resize canvas
   canvas..width = bitmap.width..height = bitmap.height;
+  ctx.drawImage(bitmap, 0, 0);
 
   var startTime = DateTime.now();
 
@@ -111,7 +136,7 @@ Future<Null> Function(int,int,int,int) makeRegionRenderer(HTMLCanvasElement canv
     int fx = x.clamp(0, width-1), fy = y.clamp(0, height-1);
     int fw = (w+(x-fx)).clamp(0, width-fx), fh = (h+(y-fy)).clamp(0, height-fy);
 
-    canvas.context2D..fillStyle="black".toJS..fillRect(fx,fy,fw,fh);
+    //canvas.context2D..fillStyle="black".toJS..fillRect(fx,fy,fw,fh);
 
     return renderer.sendCommand(RenderCommands.render, payload: RendererRenderMessage(x: fx, y: fy, width: fw, height: fh))
       .then((dynamic payload) {

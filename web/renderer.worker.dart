@@ -13,7 +13,7 @@ import "map/fillfunction.dart";
 import "utility/colour.dart";
 
 class MapWorker extends WorkerBase {
-  Logger log = new Logger("Render Worker", true);
+  Logger log = new Logger("Render Worker ${self.name}", true);
 
   ImageBitmap? sourceImage;
   MapData? sourceData;
@@ -35,8 +35,13 @@ class MapWorker extends WorkerBase {
     return null;
   }
 
+  void resetRenderer() {
+    FillFunctions.skyCache = null;
+  }
+
   Object? setSourceImage(RendererSetSourceImageMessage message) async {
     log.info("Setting source image");
+    resetRenderer();
     sourceImage = message.image;
     sourceData = new MapData.fromBitmap(message.image, TerrainTypes.GRASSLAND, seed: message.seed);
     log.debug("Element clearance: ${sourceData!.xMin} to ${sourceData!.xMax}, ${sourceData!.yMin} to ${sourceData!.yMax}");

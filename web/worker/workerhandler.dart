@@ -112,7 +112,7 @@ WorkerHandler createWebWorker(String path, {int poolSize = 1}) {
 
   List<Worker> workers = [];
   for (int i=0; i<poolSize; i++) {
-    workers.add(new Worker(jsPath));
+    workers.add(new Worker(jsPath, WorkerOptions(name: (i+1).toString())));
   }
 
   return new WorkerHandler._(workers);
