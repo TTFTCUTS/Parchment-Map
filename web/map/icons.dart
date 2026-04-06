@@ -29,7 +29,6 @@ abstract class Icons {
 
     "cactus_0",
     "cactus_1",
-    "cactus_1",
     "cactus_2",
 
     "dead_tree_0",
