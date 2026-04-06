@@ -1,3 +1,5 @@
+import 'package:web/web.dart';
+
 extension ListMult<T> on List<T> {
   operator *(int other) {
     return this.repeat(other);
@@ -17,4 +19,8 @@ extension MapGenerator<T,U> on Map<T,U> {
     var results = await Future.wait(source.map((T item) async => (item, await generator(item))));
     this.addEntries(results.map(((T, U) pair)  => MapEntry(pair.$1, pair.$2)));
   }
+}
+
+extension FileListAccessor on FileList {
+  external File operator [](int position);
 }

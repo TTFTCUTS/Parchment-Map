@@ -20,33 +20,28 @@ abstract class WorkerBase {
     final Object? payload = message.payload?.toDartObject;
     final String command = message.command;
 
-    if (message.id != null) {
-      final int id = message.id!;
+    Object? processedPayload;
+    dynamic error;
+    dynamic trace;
 
-      Object? processedPayload;
-      dynamic error;
-      dynamic trace;
-
-      try {
-        processedPayload = await handleCommand(command, payload);
-      }
-      // ignore: avoid_catches_without_on_clauses
-      catch (e, t) {
-        error = e;
-        trace = t;
-      }
-
-      WorkerReply? reply = null;
-      if (error != null) {
-        reply = new WorkerReply(id:id, error: error.toString(), trace: trace.toString());
-      } else if (processedPayload != null) {
-        reply = new WorkerReply(id:id, payload: processedPayload.toExternalReference);
-      }
-
-      workerContext.postMessage(reply == null ? new WorkerReply(id: id) : reply);
-    } else {
-      handleCommand(command, payload);
+    try {
+      processedPayload = await handleCommand(command, payload);
     }
+    // ignore: avoid_catches_without_on_clauses
+    catch (e, t) {
+      error = e;
+      trace = t;
+    }
+
+    WorkerReply? reply = null;
+    if (error != null) {
+      print(error);
+      reply = new WorkerReply(error: error.toString(), trace: trace.toString());
+    } else if (processedPayload != null) {
+      reply = new WorkerReply(payload: processedPayload.toExternalReference);
+    }
+
+    workerContext.postMessage(reply == null ? new WorkerReply() : reply);
   }
 
   Future<Object?> handleCommand(String command, Object? payload);
